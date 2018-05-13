@@ -1,0 +1,211 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>Hello APP</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <style>
+        #demo {
+            margin-top: 100px;
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+<div id="demo">
+
+</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/jquery-3.0.0.min.js"></script>
+<script type="text/javascript" src="../script/echarts.min.js"></script>
+<script type="text/javascript" src="../script/testData.js"></script>
+<script type="text/javascript">
+    $(function () {
+        initLinexChart(data.salesQtyPart);
+    });
+
+    /**
+     * @date:2018/5/4 13:44
+     * 作者:GaoXiaoXiong
+     * 功能: 初始化折线图
+     * @salesQtyPartList 集合参数
+     */
+
+    function initLinexChart(salesQtyPartList) {
+        var listValue00 = [], listValue01 = [], listValue02 = [];
+        var zheYearList = [], zhuYearList = [], totalYearList = [];//年份
+        var isFirat = false;
+        //从集合中取出value数据集
+        for (var i = 0; i < salesQtyPartList.length; i++) {
+            var sale = salesQtyPartList[i];
+            for (var j = 0; j < sale.data.length; j++) {
+                if (j == 0) {
+                    listValue00.push(sale.data[j].value);
+                } else if (j == 1) {
+                    listValue01.push(sale.data[j].value);
+                } else {
+                    listValue02.push(sale.data[j].value);
+                }
+                if (!isFirat) {//填写年份
+                    if (j == sale.data.length - 1) {
+                        isFirat = true;
+                    }
+                    zheYearList.push(sale.data[j].year + "折线图");
+                    zhuYearList.push(sale.data[j].year + "柱状图");
+                }
+            }
+        }
+        for (var i = 0; i < zheYearList.length; i++) {
+            totalYearList.push(zheYearList[i]);
+        }
+        for (var i = 0; i < zhuYearList.length; i++) {
+            totalYearList.push(zhuYearList[i]);
+        }
+
+
+        var dom  = document.getElementById("demo");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        option = {
+            tooltip: {//提示框组件
+                trigger: 'axis',//坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。只有设置了这个参数才会出现竖直的线条
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                    type: 'line'        //指示器类型。
+                },
+                formatter: function (params) {//提示框自定义
+                    return formatterTip(params);
+                },
+            },
+            toolbox: {
+                show: false,
+            },
+            legend: {//这里定义了折线图上面那2排的颜色，显示的样子
+                data: totalYearList,
+                textStyle: {
+                    color: "#92DCFB",
+                }
+            },
+            color: [//定义了线条，柱状图的颜色，颜色值的顺序你要跟你上面的totalYearList存储的顺序要一直
+                "#E9B943", "#BA674E", "#CD3E29",
+                "#205397", "#479AE6", "#57C3FB"
+            ],
+            grid: {//定义折线图距离左边多少右边多少上边多少的距离
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                top: '30%',
+                containLabel: true //grid 区域是否包含坐标轴的刻度标签。如果不写true，那么纵坐标的位置就不会算进上面设置的坐边右边上边下边里面去
+            },
+            xAxis: [//定义X轴
+                {
+                    type: 'category',//设置X轴的类型
+                    name: '月',
+                    axisLabel: {//坐标轴刻度标签的相关设置。
+                        color: "#92DCFB",//设置颜色
+                        fontSize: '12',//字体大小
+                        interval: 1,//设置每个相邻之间少1个数
+                        rotate: 0,//刻度标签旋转的角度
+                    },
+                    data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']//数据源
+                }
+            ],
+            yAxis: [//定义y轴
+                {
+                    type: 'value',
+                    name: '吨',
+                    axisLabel: {//坐标轴刻度标签的相关设置。
+                        color: "#92DCFB",
+                        fontSize: '14',
+                        interval: 0,
+                    },
+                    axisLine: {//坐标轴颜色
+                        lineStyle: {//坐标轴颜色
+                            color: "#92DCFB",
+                        },
+                    },
+                },
+            ],
+            series: [//系列列表。每个系列通过 type 决定自己的图表类型
+                {
+                    name: zheYearList[0],//数据项名称。如果不写这个那么上面的2排里面就会少一个
+                    type: 'line',//设置为折线图
+                    data: listValue00,
+                    showAllSymbol: true,//示折线图上所有小标签
+                    symbolSize: 5,//标记的大小
+                },
+                {
+                    name: zheYearList[1],//数据项名称。
+                    type: 'line',
+                    data: listValue01,
+                    showAllSymbol: true,//示折线图上所有小标签
+                    symbolSize: 5,//标记的大小
+                },
+                {
+                    name: zheYearList[2],//数据项名称。
+                    type: 'line',
+                    data: listValue02,
+                    showAllSymbol: true,//示折线图上所有小标签
+                    symbolSize: 5,//标记的大小
+                },
+                {
+                    name: zhuYearList[0],
+                    type: 'bar',//设置为柱状图
+                    data: listValue00,
+                    tooltip: {
+                        formatter: function (datas) {
+                            return "";
+                        }
+                    }
+                },
+                {
+                    name: zhuYearList[1],
+                    type: 'bar',
+                    data: listValue01,
+                },
+                {
+                    name: zhuYearList[2],
+                    type: 'bar',
+                    data: listValue02,
+                }
+            ]
+        };
+
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    }
+
+    /**
+     * @date:2018/5/9 17:38
+     * 作者:GaoXiaoXiong
+     * 功能: 控制提示框的样式
+     */
+    function formatterTip(params) {
+        //移除重复的数据
+        for (var i = 0; i < params.length; i++) {
+            for (var j = params.length - 1; j > i; j--) {
+                if (params[j].data == params[i].data) {
+                    params.splice(j, 1);
+                    break;
+                }
+            }
+        }
+
+        var tip = '';
+        for (var i = 0; i < params.length; i++) {//这里是自己定义样式， params[i].marker 表示是否显示左边的那个小圆圈
+            if (params[i].value != 0) {
+                tip = tip + params[i].marker + params[i].seriesName.substring(0, 4) + '年' + ':' + params[i].value + '<br/>';
+            }
+        }
+
+        return tip;
+    }
+
+</script>
+</html>
